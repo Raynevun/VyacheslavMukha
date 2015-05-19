@@ -1,1 +1,48 @@
-# Placeholder for your script.
+# -*- coding: utf-8 -*-
+#!/usr/bin/python
+"""
+This program get last record from beacon.nist.gov
+in xml object and after that parsed and do output summarize
+<outputValue> section
+"""
+
+from future import print_function
+import time
+import pycurl
+import optparse
+import cStringIO
+import xml.etree.ElementTree as ElementTree
+# Comment please below line if python version >=3.0
+from backport_collections import Counter
+# Uncoment please below  line if python version >= 3.0
+# from collectioms import Counter
+
+# Server Url
+url = 'https://beacon.nist.gov/rest/record/last'
+
+# Prepare file-like object for responde
+response = cStringIO.StringIO()
+
+# Take last record
+c = pycurl.Curl()
+c.setopt(c.URL, url)
+# Do write server response to our file-object
+c.setopt(c.WRITEFUNCTION, response.write)
+c.perform()
+xmlData = response.getvalue()
+#if (c.getinfo(pycurl.HTTP_CODE)) == 200:
+#    print (xmlData)
+c.close
+
+# Do ready our parser
+root = ElementTree.fromstring(xmlData)
+
+# Do parsing our xml
+myList = []
+for info in root.findtext("outputValue"):
+    myList.append(info)
+
+# Do count and listing
+result = Counter(myList)
+for k,v in result.items():
+    print(k,v)
